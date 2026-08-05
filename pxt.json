@@ -1,0 +1,29 @@
+{
+    "name": "Enemy shooter / Hot dog eater",
+    "description": "Controls:\nA to start, B to create arrow (need to use A first)\nWin:\nPlayer + Hot Dog\nBullet + Enemy\nLose:\nPlayer + Bullet\nPlayer + Enemy\nEnemy + Hot Dog \nBullet + Hot Dog",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "assets.json",
+        "tilemap.g.jres",
+        "tilemap.g.ts",
+        "images.g.jres",
+        "images.g.ts",
+        "main.py"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "target": "4.0.14",
+        "targetId": "arcade"
+    },
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "tsprj"
+}
