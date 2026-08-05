@@ -94,3 +94,10 @@ You have been warned.
 Give it a ⭐!
 
 The hot dog will appreciate it.
+
+## In MakeCode arcade, to edit:
+
+1. Click "Import"
+2. Click "Add by URL"
+3. Paste (or type): https://github.com/EthanIchiro/Hot_Dog_Game/
+## Now its yours!!
