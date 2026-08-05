@@ -4,11 +4,13 @@ A perfectly normal game about eating a hot dog.
 
 Nothing strange happens.
 
-Absolutely nobody gets YEETED by a cannon.
+Absolutely nobody gets **YEETED** by a cannon.
 
 Definitely no ketchup gets splattered everywhere.
 
-## 🎮 Story
+---
+
+# 🎮 Story
 
 You're hungry.
 
@@ -22,7 +24,9 @@ And a cannon.
 
 Good luck.
 
-## 🌭 Features
+---
+
+# 🌭 Features
 
 - 🌭 Control the Hot Dog.
 - 😀 Control yourself.
@@ -37,16 +41,29 @@ Good luck.
 - 🎶 Background music.
 - 😂 Lots of funny dialogue.
 
-## 📷 Gameplay
+---
 
-- Eat the hot dog to win.
-- Shoot the enemy to win.
-- Don't shoot the hot dog.
-- Don't get eaten.
-- Don't get shot.
-- Don't let the enemy steal your lunch.
+# 📷 Gameplay
 
-## 💬 Some of my favorite quotes
+Your goal is simple.
+
+Eat the hot dog before anything else does.
+
+Things that can happen:
+
+- 🌭 Eat the hot dog to win.
+- 🔫 Shoot the enemy to win.
+- 💥 Destroy your own cannon.
+- 🚀 Get launched across the map.
+- 🍅 Cover the cannon in ketchup.
+- 🐌 Slow your cannon because it's sticky.
+- 😭 Accidentally shoot your lunch.
+- 👾 Let the enemy steal your lunch.
+- ☠ Lose in many very silly ways.
+
+---
+
+# 💬 Some of my favorite quotes
 
 > "EWW KETCHUP"
 
@@ -58,46 +75,75 @@ Good luck.
 
 > "plain... still yummy"
 
-## 🛠 Built With
+---
+
+# 🛠 Built With
 
 - Microsoft MakeCode Arcade
 - TypeScript
 
-## 📊 Stats
+---
+
+# 📊 Project Stats
 
 - 🌭 1000+ lines of TypeScript
 - 😂 Too many jokes
 - 🍅 Way too much ketchup
+- 🔫 One very unfortunate cannon
+- 🌭 One delicious hot dog
 
-## ⚠ Warning
+---
+
+# ⚠ Warning
 
 This game contains:
 
-- Flying hot dogs
-- Sticky cannons
-- Extremely hungry enemies
-- Unnecessary amounts of YEET
+- 🌭 Flying hot dogs
+- 🚀 Extreme YEET
+- 🍅 Sticky cannons
+- 😭 Very hungry people
+- 👾 Extremely hungry enemies
+- 😂 Questionable game design
+- 🌭 An unhealthy obsession with hot dogs
 
 You have been warned.
 
-## 🚀 Future Plans
+---
+
+# 🚀 Future Plans
 
 - 🐿 Squirrels
 - 🐦 Seagulls
 - 🍟 French Fry Rain
 - 🍅 Ketchup King Boss
 - 🌭 Angry Hot Dog
-- Even more chaos
+- 😂 Even more chaos
 
-## ⭐ If you enjoyed this project...
+---
 
-Give it a ⭐!
+# ▶️ Play / Import into MakeCode Arcade
+
+1. Open **Microsoft MakeCode Arcade**
+2. Click **Import**
+3. Click **Import URL**
+4. Paste:
+
+```text
+https://github.com/EthanIchiro/Hot_Dog_Game/
+```
+
+That's it!
+
+Now it's yours!! 🌭
+
+---
+
+# ⭐ Like the game?
+
+If this game made you laugh...
+
+Give the repository a ⭐.
 
 The hot dog will appreciate it.
 
-## In MakeCode arcade, to edit:
-
-1. Click "Import"
-2. Click "Add by URL"
-3. Paste (or type): https://github.com/EthanIchiro/Hot_Dog_Game/
-## Now its yours!!
+🌭❤️
