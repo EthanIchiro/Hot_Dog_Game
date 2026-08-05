@@ -1,52 +1,96 @@
- 
+# 🌭 Hot Dog Disaster
 
+A perfectly normal game about eating a hot dog.
 
-> Open this page at [https://ethanichiro.github.io/enemy_shooter-hot_dog_eater/](https://ethanichiro.github.io/enemy_shooter-hot_dog_eater/)
+Nothing strange happens.
 
-## Use as Extension
+Absolutely nobody gets YEETED by a cannon.
 
-This repository can be added as an **extension** in MakeCode.
+Definitely no ketchup gets splattered everywhere.
 
-* open [https://arcade.makecode.com/](https://arcade.makecode.com/)
-* click on **New Project**
-* click on **Extensions** under the gearwheel menu
-* search for **https://github.com/ethanichiro/enemy_shooter-hot_dog_eater** and import
+## 🎮 Story
 
-## Edit this project
+You're hungry.
 
-To edit this repository in MakeCode.
+There's a hot dog.
 
-* open [https://arcade.makecode.com/](https://arcade.makecode.com/)
-* click on **Import** then click on **Import URL**
-* paste **https://github.com/ethanichiro/enemy_shooter-hot_dog_eater** and click import
+Unfortunately...
 
-#### Metadata (used for search, rendering)
+There's also an enemy.
 
-* for PXT/arcade
-<script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
+And a cannon.
 
+Good luck.
 
+## 🌭 Features
 
-> Open this page at [https://ethanichiro.github.io/hot_dog_game/](https://ethanichiro.github.io/hot_dog_game/)
+- 🌭 Control the Hot Dog.
+- 😀 Control yourself.
+- 👾 Enemy that chases the closest target.
+- 🔫 Shoot a cannon.
+- 💥 Destroy the cannon.
+- 🚀 Get YEETED by the cannon.
+- 🍅 Lose the hot dog's ketchup and mustard.
+- 🧼 Make the cannon sticky.
+- 🐌 Sticky cannon shoots slower.
+- 🎵 Sound effects.
+- 🎶 Background music.
+- 😂 Lots of funny dialogue.
 
-## Use as Extension
+## 📷 Gameplay
 
-This repository can be added as an **extension** in MakeCode.
+- Eat the hot dog to win.
+- Shoot the enemy to win.
+- Don't shoot the hot dog.
+- Don't get eaten.
+- Don't get shot.
+- Don't let the enemy steal your lunch.
 
-* open [https://arcade.makecode.com/](https://arcade.makecode.com/)
-* click on **New Project**
-* click on **Extensions** under the gearwheel menu
-* search for **https://github.com/ethanichiro/hot_dog_game** and import
+## 💬 Some of my favorite quotes
 
-## Edit this project
+> "EWW KETCHUP"
 
-To edit this repository in MakeCode.
+> "I am DYING of Hunger!!!"
 
-* open [https://arcade.makecode.com/](https://arcade.makecode.com/)
-* click on **Import** then click on **Import URL**
-* paste **https://github.com/ethanichiro/hot_dog_game** and click import
+> "My toppings!!!!"
 
-#### Metadata (used for search, rendering)
+> "YEET"
 
-* for PXT/arcade
-<script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
+> "plain... still yummy"
+
+## 🛠 Built With
+
+- Microsoft MakeCode Arcade
+- TypeScript
+
+## 📊 Stats
+
+- 🌭 1000+ lines of TypeScript
+- 😂 Too many jokes
+- 🍅 Way too much ketchup
+
+## ⚠ Warning
+
+This game contains:
+
+- Flying hot dogs
+- Sticky cannons
+- Extremely hungry enemies
+- Unnecessary amounts of YEET
+
+You have been warned.
+
+## 🚀 Future Plans
+
+- 🐿 Squirrels
+- 🐦 Seagulls
+- 🍟 French Fry Rain
+- 🍅 Ketchup King Boss
+- 🌭 Angry Hot Dog
+- Even more chaos
+
+## ⭐ If you enjoyed this project...
+
+Give it a ⭐!
+
+The hot dog will appreciate it.
