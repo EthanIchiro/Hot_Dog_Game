@@ -4,6 +4,7 @@ namespace SpriteKind {
     export const Seagull = SpriteKind.create()
     export const Fry = SpriteKind.create()
     export const KetchupKing = SpriteKind.create()
+    export const BonusDog = SpriteKind.create()
 }
 
 // =========================
@@ -66,6 +67,11 @@ let king_timer = 0
 let giant_dog_timer = 0
 let hotdog_scale_boost = false
 
+// Hot Dog Storm — 7.777 seconds
+let storm_active = false
+let storm_end_time = 0
+let bonus_eaten = 0
+
 // "normal" | "squirrel" | "none"
 let enemy_focus = "normal"
 
@@ -127,17 +133,40 @@ function updateAchHUD() {
 }
 
 function showAchievements() {
-    let lines = "ACHIEVEMENTS  " + achCount() + " / " + ACH_NAMES.length + "\n\n"
+    // UNLOCKED page — GREEN text
+    game.setDialogTextColor(7)
+    let unlockedText = "UNLOCKED  " + achCount() + " / " + ACH_NAMES.length + "\n"
+    let anyUnlocked = false
     for (let i = 0; i < ACH_NAMES.length; i++) {
         if (achUnlocked[i]) {
-            lines += "[x] " + ACH_NAMES[i] + "\n"
-            lines += "    " + ACH_DESC[i] + "\n\n"
-        } else {
-            lines += "[ ] " + ACH_NAMES[i] + "\n"
-            lines += "    " + ACH_DESC[i] + "\n\n"
+            anyUnlocked = true
+            unlockedText += "\n* " + ACH_NAMES[i]
+            unlockedText += "\n  " + ACH_DESC[i]
         }
     }
-    game.showLongText(lines, DialogLayout.Full)
+    if (!anyUnlocked) {
+        unlockedText += "\n\n(none yet)"
+    }
+    game.showLongText(unlockedText, DialogLayout.Center)
+
+    // LOCKED page — WHITE text
+    game.setDialogTextColor(1)
+    let lockedText = "LOCKED\n"
+    let anyLocked = false
+    for (let j = 0; j < ACH_NAMES.length; j++) {
+        if (!achUnlocked[j]) {
+            anyLocked = true
+            lockedText += "\n- " + ACH_NAMES[j]
+            lockedText += "\n  " + ACH_DESC[j]
+        }
+    }
+    if (!anyLocked) {
+        lockedText += "\n\nAll done!"
+    }
+    game.showLongText(lockedText, DialogLayout.Center)
+
+    // reset for normal dialogs
+    game.setDialogTextColor(1)
 }
 
 function achUnlock(id: number) {
@@ -151,12 +180,16 @@ function achUnlock(id: number) {
     settings.writeNumber("ach_" + id, 1)
     updateAchHUD()
     music.play(music.stringPlayable("C5:1 E5:1 G5:1 C6:2", 200), music.PlaybackMode.InBackground)
+
+    // green unlock popup
+    game.setDialogTextColor(7)
     game.splash(ACH_NAMES[id], ACH_DESC[id])
+    game.setDialogTextColor(1)
 
     if (id != 11) {
         let all = true
-        for (let j = 0; j < ACH_NAMES.length - 1; j++) {
-            if (!achUnlocked[j]) {
+        for (let k = 0; k < ACH_NAMES.length - 1; k++) {
+            if (!achUnlocked[k]) {
                 all = false
             }
         }
@@ -226,6 +259,28 @@ function imgHotDogPlain() {
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+    `
+}
+
+// Bonus storm dog: regular hot dog + MORE ketchup (2) / mustard (5)
+function imgBonusDog() {
+    return img`
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . 4 4 4 4 4 4 4 4 4 . . . .
+        . . 4 4 4 4 4 4 4 4 4 4 4 . . .
+        . 4 4 e e e e e e e e e 4 4 . .
+        . 4 4 e 2 5 2 5 2 5 2 e 4 4 . .
+        . 4 4 e 5 2 5 2 5 2 5 e 4 4 . .
+        . 4 4 e 2 5 2 5 2 5 2 e 4 4 . .
+        . 4 4 e e e e e e e e e 4 4 . .
+        . . 4 4 4 4 4 4 4 4 4 4 4 . . .
+        . . . 4 4 4 4 4 4 4 4 4 . . . .
+        . . . . 2 . 5 . 2 . 5 . . . . .
+        . . . . . 5 . 2 . 5 . . . . . .
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
@@ -491,13 +546,80 @@ function clear_event_sprites() {
     sprites.destroyAllSpritesOfKind(SpriteKind.Seagull)
     sprites.destroyAllSpritesOfKind(SpriteKind.Fry)
     sprites.destroyAllSpritesOfKind(SpriteKind.KetchupKing)
+    sprites.destroyAllSpritesOfKind(SpriteKind.BonusDog)
     SquirrelSpr = null
     SeagullSpr = null
     KingSpr = null
 }
 
 // =========================
-// EVENTS
+// HOT DOG STORM (7.777 sec)
+// =========================
+function start_hot_dog_storm() {
+    if (!Player || storm_active) {
+        return
+    }
+    storm_active = true
+    storm_end_time = game.runtime() + 7777
+    bonus_eaten = 0
+    sfx_event()
+
+    Player.sayText("HOT DOG STORM!!!")
+    if (Hot_Dog) {
+        Hot_Dog.sayText("BRING FRIENDS!!!")
+    }
+    if (Enemy) {
+        Enemy.sayText("hey no fair...")
+    }
+    if (Bullet_cannon) {
+        Bullet_cannon.sayText("I LIKE HOT DOGS")
+    }
+
+    for (let i = 0; i < randint(18, 28); i++) {
+        let d = sprites.create(imgBonusDog(), SpriteKind.BonusDog)
+        d.setPosition(randint(10, 150), randint(10, 110))
+        d.setVelocity(randint(-40, 40), randint(-40, 40))
+        d.setBounceOnWall(true)
+    }
+}
+
+function end_hot_dog_storm() {
+    storm_active = false
+    storm_end_time = 0
+    sprites.destroyAllSpritesOfKind(SpriteKind.BonusDog)
+    if (Player) {
+        if (bonus_eaten <= 0) {
+            Player.sayText("I missed the storm...")
+        } else if (bonus_eaten < 5) {
+            Player.sayText("Only " + bonus_eaten + " extra dogs?!")
+        } else if (bonus_eaten < 15) {
+            Player.sayText(bonus_eaten + " bonus dogs!!")
+        } else {
+            Player.sayText(bonus_eaten + " DOGS!!! I'M FULL!!!")
+        }
+    }
+    if (Enemy) {
+        Enemy.sayText(":(")
+    }
+}
+
+function update_hot_dog_storm() {
+    if (!storm_active) {
+        return
+    }
+    if (run_frames % 30 == 0) {
+        for (let d of sprites.allOfKind(SpriteKind.BonusDog)) {
+            d.setVelocity(randint(-50, 50), randint(-50, 50))
+            wrap_sprite(d)
+        }
+    }
+    if (game.runtime() >= storm_end_time || sprites.allOfKind(SpriteKind.BonusDog).length == 0) {
+        end_hot_dog_storm()
+    }
+}
+
+// =========================
+// OTHER EVENTS
 // =========================
 function start_revolt() {
     if (!Hot_Dog || revolt_active || angry_dog) {
@@ -872,17 +994,19 @@ function try_trigger_random_event() {
         return
     }
     let roll = randint(0, 100)
-    if (roll < 18) {
+    if (roll < 16) {
         spawn_squirrel()
-    } else if (roll < 30) {
+    } else if (roll < 26) {
         start_fry_rain()
-    } else if (roll < 42) {
+    } else if (roll < 36) {
         spawn_seagull()
-    } else if (roll < 52) {
+    } else if (roll < 44) {
         start_giant_dog()
-    } else if (roll < 60) {
+    } else if (roll < 50) {
         spawn_ketchup_king()
-    } else if (roll < 75 && run_frames > revolt_trigger_at && !revolt_active) {
+    } else if (roll < 58) {
+        start_hot_dog_storm()
+    } else if (roll < 72 && run_frames > revolt_trigger_at && !revolt_active) {
         start_revolt()
     } else {
         if (Player && randint(0, 1) == 0) {
@@ -944,6 +1068,9 @@ function start_game() {
     king_timer = 0
     giant_dog_timer = 0
     hotdog_scale_boost = false
+    storm_active = false
+    storm_end_time = 0
+    bonus_eaten = 0
     cannon_chat_timer = randint(180, 360)
     chatter_timer = randint(200, 400)
     schedule_next_event()
@@ -1067,6 +1194,7 @@ game.onUpdate(function () {
     update_fry_rain()
     update_seagull()
     update_king()
+    update_hot_dog_storm()
     try_trigger_random_event()
 
     if (Bullet_cannon && !busy) {
@@ -1286,6 +1414,7 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Player, function (sprite, otherSp
     end_game(false)
 })
 
+// Main hot dog: sometimes STORM, otherwise win
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     if (!overlaps_active()) {
         return
@@ -1293,6 +1422,13 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     if (SquirrelSpr) {
         return
     }
+
+    // ~30% chance Hot Dog Storm
+    if (!storm_active && randint(0, 99) < 30) {
+        start_hot_dog_storm()
+        return
+    }
+
     busy = true
     sfx_eat()
     otherSprite.destroy()
@@ -1309,6 +1445,27 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     }
     pause(950)
     end_game(true)
+})
+
+// Bonus storm dogs — ONLY player can eat
+sprites.onOverlap(SpriteKind.Player, SpriteKind.BonusDog, function (sprite, otherSprite) {
+    if (!overlaps_active()) {
+        return
+    }
+    otherSprite.destroy()
+    bonus_eaten += 1
+    sfx_eat()
+    if (bonus_eaten == 1) {
+        sprite.sayText("extra dog!!")
+    } else if (bonus_eaten == 5) {
+        sprite.sayText("5 dogs!!")
+    } else if (bonus_eaten == 10) {
+        sprite.sayText("10 DOGS!!!")
+    } else if (bonus_eaten == 20) {
+        sprite.sayText("I AM BECOME LUNCH")
+    } else if (randint(0, 2) == 0) {
+        sprite.sayText("nom")
+    }
 })
 
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Cannon, function (sprite, otherSprite) {
@@ -1335,4 +1492,5 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Cannon, function (sprite, otherSp
 // =========================
 achLoad()
 updateAchHUD()
+game.setDialogTextColor(1)
 game.splash("HOT DOG CANNON", "A=Start  B=Shoot  Menu=Achievements")
