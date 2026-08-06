@@ -50,9 +50,6 @@ let revolt_active = false
 let revolt_timer = 0
 let revolt_trigger_at = 0
 
-let angry_dog = false
-let angry_timer = 0
-
 let player_slip_timer = 0
 let fry_rain_timer = 0
 let enemy_fry_mode = false
@@ -76,34 +73,35 @@ let enemy_404_busy = false
 let enemy_focus = "normal"
 
 // =========================
-// ACHIEVEMENTS (SCORE ONLY — NEVER LIFE)
+// ACHIEVEMENTS (short clean names)
+// SCORE ONLY — NEVER LIFE
 // =========================
 const ACH_NAMES = [
-    "Lunch Win",
-    "Snipe Win",
-    "Yeet",
-    "Splat",
+    "Ate It",
+    "Shot Em",
+    "Yeeted",
+    "Storm",
     "Plain Win",
-    "No Cannon Win",
-    "Cannon Break",
-    "Self Shot",
-    "Shot Lunch",
-    "Stolen Lunch",
-    "Sticky Shot",
-    "All Done",
+    "No Gun Win",
+    "Gun Broke",
+    "Ouch",
+    "Oops Lunch",
+    "Stolen",
+    "Sticky",
+    "All 11",
 ]
 
 const ACH_DESC = [
     "Eat the hot dog.",
     "Shoot the enemy.",
-    "Get launched by the cannon.",
-    "Toppings splat on the cannon.",
-    "Win with a plain hot dog.",
-    "Win after the cannon breaks.",
+    "Get launched.",
+    "Start a dog storm.",
+    "Win with plain dog.",
+    "Win with no cannon.",
     "Break the cannon.",
     "Shoot yourself.",
     "Shoot the hot dog.",
-    "Enemy eats the hot dog.",
+    "Enemy eats lunch.",
     "Shoot while sticky.",
     "Unlock all others.",
 ]
@@ -133,7 +131,7 @@ function updateAchHUD() {
 
 function showAchievements() {
     game.setDialogTextColor(7)
-    let unlockedText = "UNLOCKED  " + achCount() + " / " + ACH_NAMES.length + "\n"
+    let unlockedText = "DONE  " + achCount() + "/" + ACH_NAMES.length + "\n"
     let anyUnlocked = false
     for (let i = 0; i < ACH_NAMES.length; i++) {
         if (achUnlocked[i]) {
@@ -148,7 +146,7 @@ function showAchievements() {
     game.showLongText(unlockedText, DialogLayout.Center)
 
     game.setDialogTextColor(1)
-    let lockedText = "LOCKED\n"
+    let lockedText = "TODO\n"
     let anyLocked = false
     for (let j = 0; j < ACH_NAMES.length; j++) {
         if (!achUnlocked[j]) {
@@ -476,7 +474,6 @@ const CANNON_LINES_MESSY = [
 ]
 
 function scramble_lose_message() {
-    // every 100 ms: randint(0, randint(10, randint(100, 999)))
     let loseText = "" + randint(0, randint(10, randint(100, 999)))
     game.setGameOverMessage(false, loseText)
 }
@@ -580,6 +577,7 @@ function start_hot_dog_storm() {
     storm_end_time = game.runtime() + 7777
     bonus_eaten = 0
     sfx_event()
+    achUnlock(3) // Storm
 
     Player.sayText("HOT DOG STORM!!!")
     if (Hot_Dog) {
@@ -636,10 +634,10 @@ function update_hot_dog_storm() {
 }
 
 // =========================
-// OTHER EVENTS
+// OTHER EVENTS (no angry dog chase)
 // =========================
 function start_revolt() {
-    if (!Hot_Dog || revolt_active || angry_dog) {
+    if (!Hot_Dog || revolt_active) {
         return
     }
     revolt_active = true
@@ -656,7 +654,7 @@ function start_revolt() {
 function end_revolt() {
     revolt_active = false
     revolt_timer = 0
-    if (Hot_Dog && !angry_dog) {
+    if (Hot_Dog) {
         controller.moveSprite(Hot_Dog, 60, 100)
         Hot_Dog.sayText("ok I'm calm...")
     }
@@ -685,52 +683,6 @@ function update_revolt() {
     Hot_Dog.y += vy
     if (revolt_timer <= 0) {
         end_revolt()
-    }
-}
-
-function maybe_angry_hotdog() {
-    if (angry_dog || !Hot_Dog) {
-        return
-    }
-    if (randint(0, 100) < 45) {
-        angry_dog = true
-        angry_timer = randint(300, 480)
-        controller.moveSprite(Hot_Dog, 0, 0)
-        Hot_Dog.sayText("I HAVE HAD ENOUGH!")
-        if (Player) {
-            Player.sayText("GET 'EM!!")
-        }
-        sfx_event()
-    }
-}
-
-function update_angry_dog() {
-    if (!angry_dog || !Hot_Dog) {
-        return
-    }
-    angry_timer -= 1
-    if (Enemy) {
-        if (Hot_Dog.x < Enemy.x) Hot_Dog.x += 2
-        else if (Hot_Dog.x > Enemy.x) Hot_Dog.x -= 2
-        if (Hot_Dog.y < Enemy.y) Hot_Dog.y += 2
-        else if (Hot_Dog.y > Enemy.y) Hot_Dog.y -= 2
-
-        if (distance_squared(Hot_Dog, Enemy) < 120) {
-            Enemy.sayText("WHY IS THE HOT DOG ALIVE?!")
-            if (Player) {
-                Player.sayText("GET 'EM!!")
-            }
-            Enemy.x = randint(10, 150)
-            Enemy.y = randint(10, 110)
-            sfx_hit()
-        }
-    }
-    if (angry_timer <= 0) {
-        angry_dog = false
-        if (Hot_Dog && !revolt_active) {
-            controller.moveSprite(Hot_Dog, 60, 100)
-            Hot_Dog.sayText("huff...")
-        }
     }
 }
 
@@ -1038,7 +990,7 @@ function try_trigger_random_event() {
 }
 
 // =========================
-// START — random enemy spawn
+// START
 // =========================
 function start_game() {
     sprites.destroyAllSpritesOfKind(SpriteKind.Player)
@@ -1074,8 +1026,6 @@ function start_game() {
     revolt_active = false
     revolt_timer = 0
     revolt_trigger_at = randint(600, 900)
-    angry_dog = false
-    angry_timer = 0
     player_slip_timer = 0
     fry_rain_timer = 0
     enemy_fry_mode = false
@@ -1105,7 +1055,7 @@ function start_game() {
     Hot_Dog = sprites.create(assets.image`Hot dog`, SpriteKind.Food)
     Hot_Dog.setPosition(40, 30)
 
-    // RANDOM SPAWN (no safe-distance checks)
+    // random spawn
     Enemy = sprites.create(assets.image`Enemy`, SpriteKind.Enemy)
     Enemy.setPosition(randint(0, 160), randint(0, 120))
 
@@ -1170,12 +1120,10 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 
-// Lose message glitches every 100 ms
 game.onUpdateInterval(100, function () {
     scramble_lose_message()
 })
 
-// 404 check every 1 second — 0.09% chance
 game.onUpdateInterval(1000, function () {
     if (!game_started || busy || enemy_404_busy || start_grace > 0) {
         return
@@ -1225,7 +1173,6 @@ game.onUpdate(function () {
 
     update_slip()
     update_revolt()
-    update_angry_dog()
     update_squirrel()
     update_giant_dog()
     update_fry_rain()
@@ -1259,7 +1206,7 @@ game.onUpdate(function () {
         chatter_timer = randint(280, 520)
     }
 
-    if (!revolt_active && !angry_dog && Hot_Dog && run_frames == revolt_trigger_at) {
+    if (!revolt_active && Hot_Dog && run_frames == revolt_trigger_at) {
         if (randint(0, 100) < 70) {
             start_revolt()
         }
@@ -1321,6 +1268,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Cannon, function (sprite, otherS
     achUnlock(2)
 })
 
+// Hot dog + cannon = HOT DOG STORM
 sprites.onOverlap(SpriteKind.Food, SpriteKind.Cannon, function (sprite, otherSprite) {
     if (!overlaps_active() || !hotdog_launch_ready || !Hot_Dog || !Bullet_cannon) {
         return
@@ -1328,30 +1276,34 @@ sprites.onOverlap(SpriteKind.Food, SpriteKind.Cannon, function (sprite, otherSpr
     if (SquirrelSpr) {
         return
     }
+    if (storm_active) {
+        return
+    }
+
     hotdog_launch_ready = false
     hotdog_cooldown = 40
+
+    // little bounce so overlap does not spam
     Hot_Dog.setVelocity(0, 0)
-    Hot_Dog.setPosition(20, 80)
-    sfx_yeet()
-    if (!hotdog_is_plain) {
+    Hot_Dog.setPosition(Hot_Dog.x - 12, Hot_Dog.y - 8)
+    Hot_Dog.sayText("STORM TIME!!!")
+    if (Bullet_cannon) {
+        Bullet_cannon.sayText("MORE DOGS!!!")
+    }
+
+    // optional: first storm also makes cannon messy
+    if (!cannon_is_messy) {
         sfx_splat()
-        Hot_Dog.setImage(imgHotDogPlain())
-        hotdog_is_plain = true
-        Hot_Dog.sayText("My toppings!!!!")
         Bullet_cannon.setImage(imgCannonMessy())
         cannon_is_messy = true
-        Bullet_cannon.sayText("EWW KETCHUP")
-        if (Player) {
-            Player.sayText("Slow sticky cannon...")
-        }
-        achUnlock(3)
-        maybe_angry_hotdog()
-    } else {
-        Hot_Dog.sayText("plain YEET")
-        if (randint(0, 1) == 0) {
-            Hot_Dog.sayText("I MISS MY KETCHUP!")
+        if (!hotdog_is_plain) {
+            Hot_Dog.setImage(imgHotDogPlain())
+            hotdog_is_plain = true
+            Hot_Dog.sayText("My toppings!!!!")
         }
     }
+
+    start_hot_dog_storm()
 })
 
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Food, function (sprite, otherSprite) {
@@ -1451,16 +1403,12 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Player, function (sprite, otherSp
     end_game(false)
 })
 
+// Eat main hot dog = win (storm is from cannon now)
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     if (!overlaps_active()) {
         return
     }
     if (SquirrelSpr) {
-        return
-    }
-
-    if (!storm_active && randint(0, 99) < 30) {
-        start_hot_dog_storm()
         return
     }
 
@@ -1528,4 +1476,4 @@ achLoad()
 updateAchHUD()
 game.setDialogTextColor(1)
 scramble_lose_message()
-game.splash("v7.3 - Randomness update ", "A=Start  B=Shoot  Menu=Achievements")
+game.splash("v7.1 - Randomness update", "A=Start  B=Shoot  Menu=Achievements")
