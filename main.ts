@@ -8,7 +8,7 @@ namespace SpriteKind {
 }
 
 // =========================
-// CORE SPRITES / STATE
+// CORE STATE
 // =========================
 let Player: Sprite = null
 let Bullet: Sprite = null
@@ -46,7 +46,6 @@ let SCREEN_H = 120
 let game_started = false
 let run_frames = 0
 
-// ---- event state ----
 let revolt_active = false
 let revolt_timer = 0
 let revolt_trigger_at = 0
@@ -67,10 +66,11 @@ let king_timer = 0
 let giant_dog_timer = 0
 let hotdog_scale_boost = false
 
-// Hot Dog Storm — 7.777 seconds
 let storm_active = false
 let storm_end_time = 0
 let bonus_eaten = 0
+
+let enemy_404_busy = false
 
 // "normal" | "squirrel" | "none"
 let enemy_focus = "normal"
@@ -128,12 +128,10 @@ function achCount() {
 }
 
 function updateAchHUD() {
-    // SCORE only — never info.setLife
     info.setScore(achCount())
 }
 
 function showAchievements() {
-    // UNLOCKED page — GREEN text
     game.setDialogTextColor(7)
     let unlockedText = "UNLOCKED  " + achCount() + " / " + ACH_NAMES.length + "\n"
     let anyUnlocked = false
@@ -149,7 +147,6 @@ function showAchievements() {
     }
     game.showLongText(unlockedText, DialogLayout.Center)
 
-    // LOCKED page — WHITE text
     game.setDialogTextColor(1)
     let lockedText = "LOCKED\n"
     let anyLocked = false
@@ -164,8 +161,6 @@ function showAchievements() {
         lockedText += "\n\nAll done!"
     }
     game.showLongText(lockedText, DialogLayout.Center)
-
-    // reset for normal dialogs
     game.setDialogTextColor(1)
 }
 
@@ -180,8 +175,6 @@ function achUnlock(id: number) {
     settings.writeNumber("ach_" + id, 1)
     updateAchHUD()
     music.play(music.stringPlayable("C5:1 E5:1 G5:1 C6:2", 200), music.PlaybackMode.InBackground)
-
-    // green unlock popup
     game.setDialogTextColor(7)
     game.splash(ACH_NAMES[id], ACH_DESC[id])
     game.setDialogTextColor(1)
@@ -265,7 +258,6 @@ function imgHotDogPlain() {
     `
 }
 
-// Bonus storm dog: regular hot dog + MORE ketchup (2) / mustard (5)
 function imgBonusDog() {
     return img`
         . . . . . . . . . . . . . . . .
@@ -370,29 +362,6 @@ function distance_squared(a: Sprite, b: Sprite) {
     dx = a.x - b.x
     dy = a.y - b.y
     return dx * dx + dy * dy
-}
-
-function far_enough(x: number, y: number, other: Sprite, minDist: number) {
-    if (!other) {
-        return true
-    }
-    let ddx = x - other.x
-    let ddy = y - other.y
-    return ddx * ddx + ddy * ddy >= minDist * minDist
-}
-
-function place_enemy_safe() {
-    for (let i = 0; i < 50; i++) {
-        let x = randint(12, 148)
-        let y = randint(12, 108)
-        if (far_enough(x, y, Player, 55)
-            && far_enough(x, y, Hot_Dog, 50)
-            && far_enough(x, y, Bullet_cannon, 45)) {
-            Enemy.setPosition(x, y)
-            return
-        }
-    }
-    Enemy.setPosition(20, 20)
 }
 
 function wrap_sprite(sprite: Sprite) {
@@ -506,14 +475,22 @@ const CANNON_LINES_MESSY = [
     "sticky...",
 ]
 
+function scramble_lose_message() {
+    // every 100 ms: randint(0, randint(10, randint(100, 999)))
+    let loseText = "" + randint(0, randint(10, randint(100, 999)))
+    game.setGameOverMessage(false, loseText)
+}
+
 function end_game(win: boolean) {
     music.stopAllSounds()
     if (win) {
         sfx_win()
+        game.setGameOverMessage(true, "YOU WIN!!")
     } else {
         sfx_lose()
+        scramble_lose_message()
     }
-    pause(200)
+    pause(100)
     game.over(win)
 }
 
@@ -550,6 +527,46 @@ function clear_event_sprites() {
     SquirrelSpr = null
     SeagullSpr = null
     KingSpr = null
+}
+
+// =========================
+// 404 GLITCH WIN
+// =========================
+function try_enemy_404_glitch() {
+    if (!game_started || busy || enemy_404_busy || start_grace > 0) {
+        return
+    }
+    if (!Enemy || !Player) {
+        return
+    }
+
+    enemy_404_busy = true
+    busy = true
+    Enemy.setVelocity(0, 0)
+
+    sfx_event()
+    Enemy.sayText("404 Error: Food not dected")
+    pause(900)
+
+    if (Enemy) {
+        Enemy.sayText("404: Cannot turn off")
+    }
+    pause(900)
+
+    if (Enemy) {
+        Enemy.sayText("...")
+        pause(400)
+        Enemy.destroy()
+        Enemy = null
+    }
+
+    if (Player) {
+        Player.sayText("free win???")
+    }
+    pause(600)
+
+    achUnlock(1)
+    end_game(true)
 }
 
 // =========================
@@ -1021,7 +1038,7 @@ function try_trigger_random_event() {
 }
 
 // =========================
-// START
+// START — random enemy spawn
 // =========================
 function start_game() {
     sprites.destroyAllSpritesOfKind(SpriteKind.Player)
@@ -1033,7 +1050,7 @@ function start_game() {
 
     game.setGameOverEffect(true, effects.confetti)
     game.setGameOverMessage(true, "YOU WIN!!")
-    game.setGameOverMessage(false, "GAME OVER!")
+    scramble_lose_message()
     game.setGameOverPlayable(true, music.melodyPlayable(music.jumpUp), false)
     game.setGameOverPlayable(false, music.melodyPlayable(music.wawawawaa), false)
 
@@ -1071,6 +1088,7 @@ function start_game() {
     storm_active = false
     storm_end_time = 0
     bonus_eaten = 0
+    enemy_404_busy = false
     cannon_chat_timer = randint(180, 360)
     chatter_timer = randint(200, 400)
     schedule_next_event()
@@ -1087,8 +1105,9 @@ function start_game() {
     Hot_Dog = sprites.create(assets.image`Hot dog`, SpriteKind.Food)
     Hot_Dog.setPosition(40, 30)
 
+    // RANDOM SPAWN (no safe-distance checks)
     Enemy = sprites.create(assets.image`Enemy`, SpriteKind.Enemy)
-    place_enemy_safe()
+    Enemy.setPosition(randint(0, 160), randint(0, 120))
 
     controller.moveSprite(Hot_Dog, 60, 100)
     controller.moveSprite(Player, 30, 30)
@@ -1148,6 +1167,24 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         if (randint(0, 3) == 0) {
             Bullet_cannon.sayText("FIRE!")
         }
+    }
+})
+
+// Lose message glitches every 100 ms
+game.onUpdateInterval(100, function () {
+    scramble_lose_message()
+})
+
+// 404 check every 1 second — 0.09% chance
+game.onUpdateInterval(1000, function () {
+    if (!game_started || busy || enemy_404_busy || start_grace > 0) {
+        return
+    }
+    if (!Enemy) {
+        return
+    }
+    if (randint(1, 10000) <= 9) {
+        try_enemy_404_glitch()
     }
 })
 
@@ -1414,7 +1451,6 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Player, function (sprite, otherSp
     end_game(false)
 })
 
-// Main hot dog: sometimes STORM, otherwise win
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     if (!overlaps_active()) {
         return
@@ -1423,7 +1459,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         return
     }
 
-    // ~30% chance Hot Dog Storm
     if (!storm_active && randint(0, 99) < 30) {
         start_hot_dog_storm()
         return
@@ -1447,7 +1482,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     end_game(true)
 })
 
-// Bonus storm dogs — ONLY player can eat
 sprites.onOverlap(SpriteKind.Player, SpriteKind.BonusDog, function (sprite, otherSprite) {
     if (!overlaps_active()) {
         return
@@ -1493,4 +1527,5 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Cannon, function (sprite, otherSp
 achLoad()
 updateAchHUD()
 game.setDialogTextColor(1)
-game.splash("HOT DOG CANNON", "A=Start  B=Shoot  Menu=Achievements")
+scramble_lose_message()
+game.splash("v7.3 - Randomness update ", "A=Start  B=Shoot  Menu=Achievements")
