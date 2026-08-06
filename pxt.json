@@ -1,6 +1,6 @@
 {
     "name": "Enemy shooter / Hot dog eater",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "Controls:\nA to start, B to create arrow (need to use A first)\nWin:\nPlayer + Hot Dog\nBullet + Enemy\nLose:\nPlayer + Bullet\nPlayer + Enemy\nEnemy + Hot Dog \nBullet + Hot Dog",
     "dependencies": {
         "device": "*"
