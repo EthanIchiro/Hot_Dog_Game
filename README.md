@@ -1,3 +1,4 @@
+### This is the final update that will be in this. New ones are planned to be using Godot
 # 🌭 Hot Dog Disaster
 
 A perfectly normal game about eating a hot dog.
